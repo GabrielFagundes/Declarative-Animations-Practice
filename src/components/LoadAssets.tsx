@@ -41,7 +41,9 @@ export default ({ assets, fonts, children }: LoadAssetsProps) => {
         const savedStateString = await AsyncStorage.getItem(
           NAVIGATION_STATE_KEY
         );
-        const state = JSON.parse(savedStateString ?? "{}");
+        const state = savedStateString
+          ? JSON.parse(savedStateString)
+          : undefined;
         setInitialState(state);
       } finally {
         setIsNavigationReady(true);

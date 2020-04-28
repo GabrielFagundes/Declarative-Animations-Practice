@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import Animated, {
   Clock,
@@ -9,10 +9,12 @@ import Animated, {
   eq,
   interpolate,
   not,
+  proc,
   set,
   startClock,
   useCode,
 } from "react-native-reanimated";
+import { useClock, useValues } from "react-native-redash";
 import { Button, Card, cards } from "../components";
 
 const styles = StyleSheet.create({
@@ -26,30 +28,40 @@ const styles = StyleSheet.create({
   },
 });
 
+const duration = 500;
+
+const runAnimation = proc(
+  (
+    startAnimation: Animated.Value<number>,
+    clock: Animated.Clock,
+    from: Animated.Value<number>,
+    to: Animated.Value<number>,
+    startTime: Animated.Value<number>,
+    opacity: Animated.Node<number>
+  ) =>
+    cond(eq(startAnimation, 1), [
+      startClock(clock),
+      set(from, opacity),
+      set(to, not(to)),
+      set(startTime, clock),
+      set(startAnimation, 0),
+    ])
+);
+
 export default () => {
-  const clock = new Clock();
-  const duration = 500;
-  const startAnimation = new Value<0 | 1>(0);
-  const startTime = new Value<number>(0);
+  const [show, setShow] = useState(true);
+  const clock = useClock([]);
+  const [startTime, from, to] = useValues([0, 0, 0], []);
+  const startAnimation = new Value<0 | 1>(1);
   const endTime = add(startTime, duration);
-  const from = new Value<0 | 1>(0);
-  const to = new Value<0 | 1>(1);
   const opacity = interpolate(clock, {
     inputRange: [startTime, endTime],
     outputRange: [from, to],
     extrapolate: Extrapolate.CLAMP,
   });
   useCode(
-    () => [
-      startClock(clock),
-      cond(eq(startAnimation, 1), [
-        set(from, opacity),
-        set(to, not(to)),
-        set(startTime, clock),
-        set(startAnimation, 0),
-      ]),
-    ],
-    [clock, from, opacity, startAnimation, startTime, to]
+    () => runAnimation(startAnimation, clock, from, to, startTime, opacity),
+    [startAnimation, clock, from, to, startTime, opacity]
   );
   return (
     <View style={styles.container}>
@@ -59,9 +71,9 @@ export default () => {
         </Animated.View>
       </View>
       <Button
-        label="Toggle"
+        label={show ? "Hide" : "Show"}
         primary
-        onPress={() => startAnimation.setValue(1)}
+        onPress={() => setShow((prev) => !prev)}
       />
     </View>
   );

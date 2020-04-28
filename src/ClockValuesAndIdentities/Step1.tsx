@@ -29,25 +29,25 @@ const styles = StyleSheet.create({
 export default () => {
   const clock = new Clock();
   const startTime = new Value<number>(0);
-  const duration = 3000;
+  const duration = 1000;
   const from = new Value<0 | 1>(0);
   const to = new Value<0 | 1>(1);
-  useCode(
-    () => [
-      startClock(clock),
-      cond(eq(startTime, -1), [
-        set(startTime, clock),
-        set(from, not(from)),
-        set(to, not(to)),
-      ]),
-    ],
-    [clock, from, startTime, to]
-  );
   const opacity = interpolate(clock, {
     inputRange: [startTime, add(startTime, duration)],
     outputRange: [from, to],
     extrapolate: Extrapolate.CLAMP,
   });
+  useCode(
+    () => [
+      startClock(clock),
+      cond(eq(startTime, -1), [
+        set(from, opacity),
+        set(to, not(to)),
+        set(startTime, clock),
+      ]),
+    ],
+    [clock, from, startTime, to, opacity]
+  );
   return (
     <View style={styles.container}>
       <View style={styles.card}>
