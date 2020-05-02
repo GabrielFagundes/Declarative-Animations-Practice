@@ -25,10 +25,37 @@ const styles = StyleSheet.create({
   },
 });
 
+const transition = (
+  <Transition.Together>
+    <Transition.In type="fade" durationMs={800} />
+    <Transition.Out type="fade" durationMs={800} />
+  </Transition.Together>
+);
+
 export default () => {
+  const ref = useRef<TransitioningView>(null);
+  const [dark, setDark] = useState(false);
   return (
-    <View style={styles.container}>
+    <Transitioning.View
+      style={styles.container}
+      ref={ref}
+      transition={transition}
+    >
+      {dark && (
+        <View
+          style={{ ...StyleSheet.absoluteFillObject, backgroundColor: "black" }}
+        />
+      )}
       <SafeAreaView />
+      <Switch
+        value={dark}
+        onValueChange={() => {
+          if (ref.current) {
+            ref.current.animateNextTransition();
+          }
+          setDark(!dark);
+        }}
+      />
       <ProfilePic />
       <View>
         <Text type="title3" style={styles.text}>
@@ -43,7 +70,7 @@ export default () => {
       <Text type="body" style={styles.text}>
         When speaking of animations, the key to success is to avoid frame drops
       </Text>
-      <Button label="Follow" primary onPress={() => {}} />
-    </View>
+      <Button label="Follow" primary onPress={() => { }} />
+    </Transitioning.View>
   );
 };
