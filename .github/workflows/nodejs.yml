@@ -24,4 +24,4 @@ jobs:
         yarn lint
         yarn tsc
       env:
-        CI: true
+        CI: false
