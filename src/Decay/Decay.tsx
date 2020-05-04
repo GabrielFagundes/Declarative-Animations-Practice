@@ -54,7 +54,9 @@ const withDecay = (
   const config = {
     deceleration: 0.998,
   };
+
   const finishDecay = [set(offset, state.position), stopClock(clock)];
+
   return block([
     cond(eq(gestureState, State.BEGAN), finishDecay),
     cond(
